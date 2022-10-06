@@ -1,129 +1,33 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# C extensions
-*.so
-
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-pip-wheel-metadata/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
-
-# Translations
-*.mo
-*.pot
-
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-target/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-.python-version
-
-# pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
-#   install all needed dependencies.
-#Pipfile.lock
-
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow
-__pypackages__/
-
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
+import numpy as np
+import matplotlib.pyplot as plt
+def func(x1,x2):
+  return x1**2+2*x2**2
+def func_grad(x1,x2):
+  return(2*x1,4*x2)   
+class Optimizers:
+  def __init__(self,lr_schedule,rate=0.01):
+    self.lr_schedule=self.lr(lr_schedule,rate)
+  def lr(self,lr_schedule,rate):
+    if  lr_schedule=="constant":
+      return  self.constant_lr(rate)
+  def constant_lr(self,rate):
+    return rate
+  def gradient_descent(self,x1,x2,t1,t2,func_grad):
+    gr_x1,gr_x2=func_grad(x1,x2)
+    return x1-self.lr_schedule*gr_x1 , x2-self.lr_schedule*gr_x2 ,0,0
+def search(optimizer,func_grad,iteration=20):
+  x1,x2,t1,t2=-5,-2,0,0
+  x_iterations=[(x1,x2)]
+  for i in range(iteration):
+    x1,x2,t1,t2=optimizer(x1,x2,t1,t2,func_grad)
+    x_iterations.append((x1,x2))
+  print("epoch{},x1:{},x2:{}".format(i+1,x1,x2))
+  return x_iterations    
+def search_path(func,x_iterations):
+  plt.plot(*zip(*(x_iterations)),"-o",color="r")
+  x1,x2=np.meshgrid(np.arange(-5.5,5.5,0.1),np.arange(-5.5,5.5,0.1))
+  plt.contourf(x1,x2,func(x1,x2))
+  plt.xlabel("x1")
+  plt.ylabel("x2") 
+opt=Optimizers("constant",rate=0.1)
+search_path(func,search(opt.gradient_descent,func_grad))  
